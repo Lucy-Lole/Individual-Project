@@ -6,6 +6,8 @@
         xmlns:local="clr-namespace:CodeSonification"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
+    <Window.Resources>
+    </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="130"/>
@@ -19,10 +21,10 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Button Name="Run" Height="20" Width="120" Margin="5"/>
-        <Button Grid.Column="1" Name="Test" Height="20" Width="120" Margin="5"/>
+        <Button Name="Run" Content="Run" Height="20" Width="120" Margin="5"/>
+        <Button Grid.Column="1" Name="Import" Content="Import" Click="Import_Click" Height="20" Width="120" Margin="5"/>
         <Button Grid.Column="3" Name="Clear" Height="20" Width="120" Margin="5"/>
 
-        <RichTextBox Grid.Row="2" Grid.ColumnSpan="4" Margin="5"/>
+        <TextBox x:Name="CodeTextBox" Grid.Row="2" Grid.ColumnSpan="4" Margin="5" TextWrapping="Wrap"/>
     </Grid>
 </Window>
