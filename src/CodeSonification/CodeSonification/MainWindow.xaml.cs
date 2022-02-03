@@ -26,7 +26,7 @@ namespace CodeSonification
             {
                 path = dlg.FileName;
 
-                ((MainWindowDataContext)DataContext).setCurrentFilePath(path);
+                ((MainWindowDataContext)DataContext).SetCurrentFilePath(path);
 
                 SetTextBoxText(File.ReadAllText(path));
             }
@@ -36,6 +36,30 @@ namespace CodeSonification
         {
             CodeTextBox.Clear();
             CodeTextBox.Text = text;
+        }
+
+        private void Run_Click(object sender, RoutedEventArgs e)
+        {
+            AudioData data = ((MainWindowDataContext)DataContext).GetAudioData();
+
+            if (((MainWindowDataContext)DataContext).BeginPlayback())
+            {
+                // Play the data returned.
+            }
+            else
+            {
+                // We have some issue.
+            }
+        }
+
+        private void Reset_Click(object sender, RoutedEventArgs e)
+        {
+            // Stop 'playback'.
+        }
+
+        private void VolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            ((MainWindowDataContext)DataContext).SetVolume(e.NewValue);
         }
     }
 }
