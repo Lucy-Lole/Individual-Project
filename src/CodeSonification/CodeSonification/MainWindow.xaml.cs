@@ -40,7 +40,12 @@ namespace CodeSonification
 
         private void Run_Click(object sender, RoutedEventArgs e)
         {
-            AudioData data = ((MainWindowDataContext)DataContext).GetAudioData();
+            if (((MainWindowDataContext)DataContext).GetCurrentFilePath() == "")
+            {
+                return;
+            }
+
+            ((MainWindowDataContext)DataContext).GetAudioData();
 
             if (((MainWindowDataContext)DataContext).BeginPlayback())
             {
@@ -60,6 +65,11 @@ namespace CodeSonification
         private void VolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             ((MainWindowDataContext)DataContext).SetVolume(e.NewValue);
+        }
+
+        private void BPM_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            ((MainWindowDataContext)DataContext).BPM = (int)(60 + e.NewValue*140);
         }
     }
 }

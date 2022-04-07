@@ -5,8 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CodeSonification"
         mc:Ignorable="d"
-        Title="Code Sonification" Height="450" Width="800">
+        Title="Code Sonification" Height="450" Width="850">
     <Window.Resources>
+        <local:SliderValueToTextConverter x:Key="SliderValueToTextConverter" />
     </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -14,8 +15,8 @@
             <ColumnDefinition Width="90"/>
             <ColumnDefinition Width="10"/>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="10"/>
-            <ColumnDefinition Width="130"/>
+            <ColumnDefinition Width="90"/>
+            <ColumnDefinition Width="90"/>
         </Grid.ColumnDefinitions>
 
         <Grid.RowDefinitions>
@@ -37,14 +38,24 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <StackPanel Orientation="Horizontal">
+            <StackPanel Orientation="Horizontal" Margin="-5">
                 <Label x:Name="VolumeLabel" Content="Volume:" VerticalAlignment="Center"/>
-                <Slider x:Name="VolumeSlider" ValueChanged="VolumeSlider_ValueChanged" Minimum="0.0" Maximum="1.0" VerticalAlignment="Center" Width="100" Margin="0,0,5,0"/>
+                <Slider x:Name="VolumeSlider" ValueChanged="VolumeSlider_ValueChanged" Minimum="0.0" Maximum="1.0" VerticalAlignment="Center" Width="100"/>
             </StackPanel>
-            
+
+            <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="-5">
+                <Label x:Name="BPMLabel" Content="BPM:" VerticalAlignment="Center"/>
+                <Slider x:Name="BPM" HorizontalAlignment="Right" ValueChanged="BPM_ValueChanged" Minimum="0.0" Maximum="1.0" VerticalAlignment="Center" Width="100" SmallChange="0.0071429"/>
+                <Label x:Name="BPMValue" Content="{Binding ElementName=BPM, Path=Value, Converter={StaticResource SliderValueToTextConverter}}" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                
+            </StackPanel>
 
         </Grid>
-        
+
+        <Border Grid.Column="4" HorizontalAlignment="Right" Height="60" Width="80" Margin="5" VerticalAlignment="Center" BorderBrush="Black" BorderThickness="1" Visibility="Visible">
+            <TextBlock Name="CurrentBeatText" Text="{Binding Path=CurrentBeat, UpdateSourceTrigger=PropertyChanged}" FontSize="30" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Border>
+
         <Button Grid.Column="5" HorizontalAlignment="Right" Name="Import" Content="Import" Click="Import_Click" Height="60" Width="80" Margin="5"/>
 
         <TextBox x:Name="CodeTextBox" Grid.Row="2" Grid.ColumnSpan="6" Margin="5" TextWrapping="Wrap"/>
