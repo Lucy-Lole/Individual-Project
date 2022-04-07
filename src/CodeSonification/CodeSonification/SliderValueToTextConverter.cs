@@ -14,7 +14,7 @@ namespace CodeSonification
         {
             if (value is double sliderVal)
             {
-                return ((int)(60 + sliderVal * 140)).ToString();
+                return ((int)(sliderVal)).ToString();
             }
             else
             {

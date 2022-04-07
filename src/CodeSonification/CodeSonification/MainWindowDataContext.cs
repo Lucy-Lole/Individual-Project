@@ -23,6 +23,9 @@ namespace CodeSonification
         private int mvarCurrentBeat;
         private int mvarTotalBeats;
 
+        private Thread mvarPlaybackThread;
+        private CancellationTokenSource mvarTokenSource;
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         public int TotalBeats
@@ -38,6 +41,11 @@ namespace CodeSonification
                 mvarCurrentBeat = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CurrentBeat"));
             }
+        }
+
+        public List<AudioData> CurrentData
+        {
+            get { return mvarCurrentData; }
         }
 
         public string CurrentBPM
@@ -59,6 +67,7 @@ namespace CodeSonification
             mvarDataPosition = 0;
             mvarCurrentBeat = 0;
             mvarAudioController = new AudioController();
+            mvarCurrentData = new List<AudioData>();
         }
 
         public string GetCurrentFilePath()
@@ -205,14 +214,35 @@ namespace CodeSonification
         {
             if (mvarPlaybackState == PlaybackState.Stopped)
             {
+                ApplyCurrentLayer();
+
                 mvarPlaybackState = PlaybackState.Playing;
 
                 CurrentBeat = 0;
 
-                Thread playbackThread = new Thread(
-                    new ParameterizedThreadStart(mvarAudioController.StartPlayback));
+                mvarTokenSource = new CancellationTokenSource();
 
-                playbackThread.Start(this);
+                mvarPlaybackThread = new Thread(() => mvarAudioController.StartPlayback(this, mvarTokenSource.Token));
+
+                mvarPlaybackThread.Start();
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public bool StopPlayback()
+        {
+            if (mvarPlaybackState == PlaybackState.Playing)
+            {
+                CurrentBeat = 0;
+
+                mvarTokenSource.Cancel();
+
+                mvarPlaybackState = PlaybackState.Stopped;
 
                 return true;
             }

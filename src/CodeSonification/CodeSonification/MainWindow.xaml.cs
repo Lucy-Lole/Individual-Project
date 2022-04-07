@@ -9,9 +9,14 @@ namespace CodeSonification
     /// </summary>
     public partial class MainWindow : Window
     {
+        MainWindowDataContext mvarDataContext;
+
+
         public MainWindow()
         {
-            DataContext = new MainWindowDataContext();
+            mvarDataContext = new MainWindowDataContext();
+
+            DataContext = mvarDataContext;
 
             InitializeComponent();
         }
@@ -59,6 +64,7 @@ namespace CodeSonification
 
         private void Reset_Click(object sender, RoutedEventArgs e)
         {
+            mvarDataContext.StopPlayback();
             // Stop 'playback'.
         }
 
@@ -69,7 +75,7 @@ namespace CodeSonification
 
         private void BPM_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            ((MainWindowDataContext)DataContext).BPM = (int)(60 + e.NewValue*140);
+            ((MainWindowDataContext)DataContext).BPM = (int)(e.NewValue);
         }
     }
 }

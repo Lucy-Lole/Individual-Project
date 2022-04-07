@@ -45,7 +45,7 @@
 
             <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="-5">
                 <Label x:Name="BPMLabel" Content="BPM:" VerticalAlignment="Center"/>
-                <Slider x:Name="BPM" HorizontalAlignment="Right" ValueChanged="BPM_ValueChanged" Minimum="0.0" Maximum="1.0" VerticalAlignment="Center" Width="100" SmallChange="0.0071429"/>
+                <Slider x:Name="BPM" HorizontalAlignment="Right" Value="80" ValueChanged="BPM_ValueChanged" Minimum="60.0" Maximum="240.0" VerticalAlignment="Center" Width="100" SmallChange="1"/>
                 <Label x:Name="BPMValue" Content="{Binding ElementName=BPM, Path=Value, Converter={StaticResource SliderValueToTextConverter}}" VerticalAlignment="Center" HorizontalAlignment="Left" />
                 
             </StackPanel>
@@ -58,6 +58,6 @@
 
         <Button Grid.Column="5" HorizontalAlignment="Right" Name="Import" Content="Import" Click="Import_Click" Height="60" Width="80" Margin="5"/>
 
-        <TextBox x:Name="CodeTextBox" Grid.Row="2" Grid.ColumnSpan="6" Margin="5" TextWrapping="Wrap"/>
+        <TextBox x:Name="CodeTextBox" Grid.Row="2" Grid.ColumnSpan="6" Margin="5" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
     </Grid>
 </Window>

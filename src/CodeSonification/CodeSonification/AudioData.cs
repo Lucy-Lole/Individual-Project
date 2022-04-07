@@ -25,6 +25,11 @@ namespace CodeSonification
             mvarLine = line;
         }
 
+        public int Line
+        {
+            get { return mvarLine; }
+        }
+
         public bool GetInherits()
         {
             return mvarInherits;
