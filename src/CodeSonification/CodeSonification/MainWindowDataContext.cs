@@ -33,6 +33,16 @@ namespace CodeSonification
             get { return mvarTotalBeats; }
         }
 
+        public LayerState Layer
+        {
+            get { return mvarLayer; }
+            private set
+            {
+                mvarLayer = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Layer"));
+            }
+        }
+
         public int CurrentBeat
         {
             get { return mvarCurrentBeat; }
@@ -68,6 +78,10 @@ namespace CodeSonification
             mvarCurrentBeat = 0;
             mvarAudioController = new AudioController();
             mvarCurrentData = new List<AudioData>();
+            mvarClassData = new List<AudioData>();
+            mvarMethodData = new List<AudioData>();
+            mvarInternalsData = new List<AudioData>();
+            mvarLayer = LayerState.Method;
         }
 
         public string GetCurrentFilePath()
@@ -250,6 +264,12 @@ namespace CodeSonification
             {
                 return false;
             }
+        }
+
+        public void ChangeLayer(LayerState newLayer)
+        {
+            Layer = newLayer;
+            ApplyCurrentLayer();
         }
     }
 }

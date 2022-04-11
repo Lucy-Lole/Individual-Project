@@ -3,7 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31702.278
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeSonification", "CodeSonification\CodeSonification.csproj", "{FBBC8942-4852-406D-9269-EB2DD8D3663B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeSonification", "CodeSonification\CodeSonification.csproj", "{FBBC8942-4852-406D-9269-EB2DD8D3663B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2759858A-91E1-4D22-93FD-31F2C402C173}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

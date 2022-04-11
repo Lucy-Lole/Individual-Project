@@ -5,10 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CodeSonification"
         mc:Ignorable="d"
-        Title="Code Sonification" Height="450" Width="850">
+        Title="Code Sonification" Height="450" Width="850"
+        PreviewKeyDown="Window_KeyDown">
     <Window.Resources>
         <local:SliderValueToTextConverter x:Key="SliderValueToTextConverter" />
+        <local:LayerToCheckedConverter x:Key="LayerToCheckedConverter" />
     </Window.Resources>
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="90"/>
@@ -48,6 +51,17 @@
                 <Slider x:Name="BPM" HorizontalAlignment="Right" Value="80" ValueChanged="BPM_ValueChanged" Minimum="60.0" Maximum="240.0" VerticalAlignment="Center" Width="100" SmallChange="1"/>
                 <Label x:Name="BPMValue" Content="{Binding ElementName=BPM, Path=Value, Converter={StaticResource SliderValueToTextConverter}}" VerticalAlignment="Center" HorizontalAlignment="Left" />
                 
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Grid.RowSpan="2" Margin="5">
+                <RadioButton x:Name="AllButton" Content="All" GroupName="Layer" Checked="Button_Checked" 
+                             IsChecked="{Binding Path=Layer, Converter={StaticResource LayerToCheckedConverter}, UpdateSourceTrigger=PropertyChanged, Mode=OneWay, ConverterParameter=All}"/>
+                <RadioButton x:Name="ClassButton" Content="Class" GroupName="Layer" Checked="Button_Checked" 
+                             IsChecked="{Binding Path=Layer, Converter={StaticResource LayerToCheckedConverter}, UpdateSourceTrigger=PropertyChanged, Mode=OneWay, ConverterParameter=Class}"/>
+                <RadioButton x:Name="MethodButton" Content="Method" GroupName="Layer" Checked="Button_Checked" 
+                             IsChecked="{Binding Path=Layer, Converter={StaticResource LayerToCheckedConverter}, UpdateSourceTrigger=PropertyChanged, Mode=OneWay, ConverterParameter=Method}"/>
+                <RadioButton x:Name="InternalButton" Content="Internal" GroupName="Layer" Checked="Button_Checked" 
+                             IsChecked="{Binding Path=Layer, Converter={StaticResource LayerToCheckedConverter}, UpdateSourceTrigger=PropertyChanged, Mode=OneWay, ConverterParameter=Internal}"/>
             </StackPanel>
 
         </Grid>
