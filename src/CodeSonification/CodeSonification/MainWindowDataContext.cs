@@ -1,4 +1,10 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CSharp;
+using System;
+using System.CodeDom;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -46,7 +52,7 @@ namespace CodeSonification
         public int CurrentBeat
         {
             get { return mvarCurrentBeat; }
-            set 
+            set
             {
                 mvarCurrentBeat = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CurrentBeat"));
@@ -62,8 +68,31 @@ namespace CodeSonification
         {
             get
             {
-                return mvarSettings.GetBPM().ToString();
+                return mvarSettings.BPM.ToString();
             }
+        }
+
+        public string CurrentFilePath
+        {
+            get { return mvarCurrentFilePath; }
+            set { mvarCurrentFilePath = value; }
+        }
+
+        public double Volume
+        {
+            get { return mvarSettings.Volume; }
+            set { mvarSettings.Volume = value; }
+        }
+
+        public int BPM
+        {
+            get { return mvarSettings.BPM; }
+            set { mvarSettings.BPM = value; }
+        }
+
+        public PlaybackState CurrentState
+        {
+            get { return mvarPlaybackState; }
         }
 
         private string[] mvarClassKeywords = {"public", "private", "protected", "internal"};
@@ -84,30 +113,6 @@ namespace CodeSonification
             mvarLayer = LayerState.Method;
         }
 
-        public string GetCurrentFilePath()
-        {
-            return mvarCurrentFilePath;
-        }
-        public void SetCurrentFilePath(string value)
-        {
-            mvarCurrentFilePath = value;
-        }
-
-        public double GetVolume()
-        {
-            return mvarSettings.GetVolume();
-        }
-        public void SetVolume(double value)
-        {
-            mvarSettings.SetVolume(value);
-        }
-
-        public int BPM
-        {
-            get { return mvarSettings.GetBPM(); }
-            set { mvarSettings.SetBPM(value); }
-        }
-
         public void IncrementPosition()
         {
             if (mvarDataPosition < mvarCurrentData.Count())
@@ -115,17 +120,13 @@ namespace CodeSonification
                 mvarDataPosition++;
             }
         }
+
         public void DecrementPosition()
         {
             if (mvarDataPosition > 0)
             {
                 mvarDataPosition--;
             }
-        }
-
-        public PlaybackState GetPlaybackState()
-        {
-            return mvarPlaybackState;
         }
 
         private void ApplyCurrentLayer()
@@ -169,6 +170,50 @@ namespace CodeSonification
             return MuteType.normal;
         }
 
+        private void RecurseFindData(MemberDeclarationSyntax member)
+        {
+            if (member is MethodDeclarationSyntax ms)
+            {
+                AudioData newData = new AudioData(ms.Identifier.Text,
+                    ms.GetLocation().GetLineSpan().StartLinePosition.Line,
+                    false,
+                    Instrument.guitar,
+                    ms.Modifiers.Count > 0 ? GetMuteType(ms.Modifiers.First().Text) : MuteType.normal,
+                    false);
+
+                newData.Length = ms.GetLocation().GetLineSpan().EndLinePosition.Line - ms.GetLocation().GetLineSpan().StartLinePosition.Line;
+
+                mvarMethodData.Add(newData);
+            }
+            else if (member is ClassDeclarationSyntax cs)
+            {
+                AudioData newData = new AudioData(cs.Identifier.Text, 
+                    cs.GetLocation().GetLineSpan().StartLinePosition.Line, 
+                    false, 
+                    Instrument.piano,
+                    cs.Modifiers.Count > 0 ? GetMuteType(cs.Modifiers.First().Text) : MuteType.normal, 
+                    cs.BaseList != null);
+
+                newData.Length = cs.GetLocation().GetLineSpan().EndLinePosition.Line - cs.GetLocation().GetLineSpan().StartLinePosition.Line;
+
+                mvarClassData.Add(newData);
+
+                foreach (var child in cs.Members)
+                {
+                    RecurseFindData(child);
+                }
+            }
+            else if (member is NamespaceDeclarationSyntax ns)
+            {
+                foreach (var child in ns.Members)
+                {
+                    RecurseFindData(child);
+                }
+            }
+
+
+        }
+
         public void GetAudioData()
         {
             mvarClassData = new List<AudioData>();
@@ -179,49 +224,26 @@ namespace CodeSonification
 
             mvarTotalBeats = lines.Length;
 
-            for (int j = 0; j < mvarTotalBeats; j++)
+            SyntaxTree tree = CSharpSyntaxTree.ParseText(File.ReadAllText(mvarCurrentFilePath));
+            CompilationUnitSyntax root = tree.GetCompilationUnitRoot();
+
+            foreach (UsingDirectiveSyntax us in root.Usings)
             {
-                string[] words = lines[j].Split(' ');
+                AudioData newData = new AudioData(us.Name.ToString(),
+                    us.GetLocation().GetLineSpan().StartLinePosition.Line,
+                    true,
+                    Instrument.dust,
+                    MuteType.normal,
+                    false);
 
-                for (int i = 0; i < words.Length; i++)
-                {
-                    string word = words[i];
-                    MuteType mute = MuteType.normal;
-                    bool inheritance = false;
-
-                    if (word == "")
-                        continue;
-
-                    if (word == "using")
-                    {
-                        AudioData newData = new AudioData(words[i + 1], j, true, Instrument.dust, mute, false);
-                        mvarClassData.Add(newData);
-                    }
-                    else if (word == "class")
-                    {
-                        // There can be up to 3 words before a class, but we only need to check in 2 positions for access modifiers.
-                        if (i != 0 && mvarClassKeywords.Contains(words[i - 1]))
-                        {
-                            mute = GetMuteType(words[i - 1]);
-                        }
-                        else if (i > 1 && mvarClassKeywords.Contains(words[i - 2]))
-                        {
-                            mute = GetMuteType(words[i - 2]);
-                        }
-
-                        if (i+2 < words.Length && words[i + 2] == ":")
-                        {
-                            inheritance = true;
-                        }
-
-
-                        AudioData newData = new AudioData(words[i + 1], j, false, Instrument.piano, mute, inheritance);
-                        mvarClassData.Add(newData);
-                    }
-
-                }
-
+                mvarClassData.Add(newData);
             }
+
+            foreach (var member in root.Members)
+            {
+                RecurseFindData(member);
+            }
+
         }
 
         public bool BeginPlayback()

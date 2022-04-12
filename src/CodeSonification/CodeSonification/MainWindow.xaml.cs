@@ -10,8 +10,7 @@ namespace CodeSonification
     /// </summary>
     public partial class MainWindow : Window
     {
-        MainWindowDataContext mvarDataContext;
-
+        private MainWindowDataContext mvarDataContext;
 
         public MainWindow()
         {
@@ -32,7 +31,7 @@ namespace CodeSonification
             {
                 path = dlg.FileName;
 
-                ((MainWindowDataContext)DataContext).SetCurrentFilePath(path);
+                mvarDataContext.CurrentFilePath = path;
 
                 SetTextBoxText(File.ReadAllText(path));
             }
@@ -46,14 +45,14 @@ namespace CodeSonification
 
         private void Run_Click(object sender, RoutedEventArgs e)
         {
-            if (((MainWindowDataContext)DataContext).GetCurrentFilePath() == "")
+            if (mvarDataContext.CurrentFilePath == "")
             {
                 return;
             }
 
-            ((MainWindowDataContext)DataContext).GetAudioData();
+            mvarDataContext.GetAudioData();
 
-            if (((MainWindowDataContext)DataContext).BeginPlayback())
+            if (mvarDataContext.BeginPlayback())
             {
                 // Play the data returned.
             }
@@ -71,12 +70,12 @@ namespace CodeSonification
 
         private void VolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            ((MainWindowDataContext)DataContext).SetVolume(e.NewValue);
+            mvarDataContext.Volume = e.NewValue;
         }
 
         private void BPM_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            ((MainWindowDataContext)DataContext).BPM = (int)e.NewValue;
+            mvarDataContext.BPM = (int)e.NewValue;
         }
 
         private void Button_Checked(object sender, RoutedEventArgs e)

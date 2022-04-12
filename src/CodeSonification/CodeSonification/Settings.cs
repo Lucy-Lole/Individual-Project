@@ -17,23 +17,16 @@ namespace CodeSonification
             mvarVolume = 0.5;
         }
 
-        public int GetBPM()
+        public int BPM
         {
-            return mvarBPM;
+            get { return mvarBPM; }
+            set { mvarBPM = value; }
         }
 
-        public void SetBPM(int value)
+        public double Volume
         {
-            mvarBPM = value;
-        }
-
-        public double GetVolume()
-        {
-            return mvarVolume;
-        }
-        public void SetVolume(double value)
-        {
-            mvarVolume = value;
+            get { return mvarVolume; }
+            set { mvarVolume = value; }
         }
     }
 }

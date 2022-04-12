@@ -14,6 +14,7 @@ namespace CodeSonification
         private string mvarName;
         private Instrument mvarInstrument;
         private int mvarLine;
+        private int mvarLength;
 
         public AudioData(string Name, int line, bool isStatic, Instrument instrument, MuteType mute, bool inherits)
         {
@@ -23,6 +24,7 @@ namespace CodeSonification
             mvarInherits = inherits;
             mvarInstrument = instrument;
             mvarLine = line;
+            mvarLength = 1;
         }
 
         public int Line
@@ -30,19 +32,25 @@ namespace CodeSonification
             get { return mvarLine; }
         }
 
-        public bool GetInherits()
+        public int Length
         {
-            return mvarInherits;
+            get { return mvarLength; }
+            set { mvarLength = value; }
         }
 
-        public MuteType GetMute()
+        public bool Inherits
         {
-            return mvarMute;
+            get { return mvarInherits; }
         }
 
-        public bool GetIsStaticSound()
+        public MuteType Mute
         {
-            return mvarStaticSound;
+            get { return mvarMute; }
+        }
+
+        public bool IsStaticSound
+        {
+            get { return mvarStaticSound; }
         }
     }
 }

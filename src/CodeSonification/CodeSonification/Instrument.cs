@@ -9,6 +9,7 @@ namespace CodeSonification
     enum Instrument
     {
         piano,
-        dust
+        dust,
+        guitar
     }
 }
