@@ -17,6 +17,7 @@ namespace CodeSonification
     class MainWindowDataContext : INotifyPropertyChanged
     {
         private string mvarCurrentFilePath;
+        private string mvarCurrentCodeText;
         private Settings mvarSettings;
         private PlaybackState mvarPlaybackState;
         private AudioController mvarAudioController;
@@ -46,6 +47,16 @@ namespace CodeSonification
             {
                 mvarLayer = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Layer"));
+            }
+        }
+
+        public string CurrentCodeText
+        {
+            get { return mvarCurrentCodeText; }
+            set
+            {
+                mvarCurrentCodeText = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CurrentCodeText"));
             }
         }
 
@@ -210,8 +221,6 @@ namespace CodeSonification
                     RecurseFindData(child);
                 }
             }
-
-
         }
 
         public void GetAudioData()
@@ -220,11 +229,7 @@ namespace CodeSonification
             mvarMethodData = new List<AudioData>();
             mvarInternalsData = new List<AudioData>();
 
-            string[] lines = File.ReadAllLines(mvarCurrentFilePath);
-
-            mvarTotalBeats = lines.Length;
-
-            SyntaxTree tree = CSharpSyntaxTree.ParseText(File.ReadAllText(mvarCurrentFilePath));
+            SyntaxTree tree = CSharpSyntaxTree.ParseText(mvarCurrentCodeText);
             CompilationUnitSyntax root = tree.GetCompilationUnitRoot();
 
             foreach (UsingDirectiveSyntax us in root.Usings)
@@ -244,12 +249,15 @@ namespace CodeSonification
                 RecurseFindData(member);
             }
 
+            mvarTotalBeats = root.GetLocation().GetLineSpan().EndLinePosition.Line - root.GetLocation().GetLineSpan().StartLinePosition.Line;
         }
 
         public bool BeginPlayback()
         {
             if (mvarPlaybackState == PlaybackState.Stopped)
             {
+                GetAudioData();
+
                 ApplyCurrentLayer();
 
                 mvarPlaybackState = PlaybackState.Playing;

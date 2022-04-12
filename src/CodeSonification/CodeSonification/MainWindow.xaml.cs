@@ -32,34 +32,13 @@ namespace CodeSonification
                 path = dlg.FileName;
 
                 mvarDataContext.CurrentFilePath = path;
-
-                SetTextBoxText(File.ReadAllText(path));
+                mvarDataContext.CurrentCodeText = File.ReadAllText(path);
             }
-        }
-
-        private void SetTextBoxText(string text)
-        {
-            CodeTextBox.Clear();
-            CodeTextBox.Text = text;
         }
 
         private void Run_Click(object sender, RoutedEventArgs e)
         {
-            if (mvarDataContext.CurrentFilePath == "")
-            {
-                return;
-            }
-
-            mvarDataContext.GetAudioData();
-
-            if (mvarDataContext.BeginPlayback())
-            {
-                // Play the data returned.
-            }
-            else
-            {
-                // We have some issue.
-            }
+            mvarDataContext.BeginPlayback();
         }
 
         private void Reset_Click(object sender, RoutedEventArgs e)
@@ -121,6 +100,11 @@ namespace CodeSonification
                 }
                 e.Handled = true;
             }
+        }
+
+        private void Window_Closed(object sender, System.EventArgs e)
+        {
+            mvarDataContext.StopPlayback();
         }
     }
 }
