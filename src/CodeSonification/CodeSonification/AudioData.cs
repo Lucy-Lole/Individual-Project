@@ -39,6 +39,11 @@ namespace CodeSonification
             get { return mvarLine; }
         }
 
+        public string Name
+        {
+            get { return mvarName; }
+        }
+
         public string ParentMethod
         {
             get { return mvarParentMethod; }

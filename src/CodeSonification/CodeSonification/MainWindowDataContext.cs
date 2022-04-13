@@ -161,6 +161,15 @@ namespace CodeSonification
                     mvarCurrentData = mvarClassData.Concat(mvarMethodData.Concat(mvarInternalsData).ToList()).ToList();
                     break;
             }
+
+            if (mvarPlaybackState == PlaybackState.Playing)
+            {
+                Dictionary<int, AudioData> newData = new Dictionary<int, AudioData>();
+
+                newData = AudioController.CreateAudioDict(mvarCurrentData);
+
+                mvarAudioController.ChangeAudioData(newData);
+            }
         }
 
         private MuteType GetMuteType(string word)
@@ -296,6 +305,22 @@ namespace CodeSonification
                     }
 
                     mvarInternalsData.Add(newData);
+                }
+                else if (st is ExpressionStatementSyntax ess)
+                {
+                    if (ess.Expression is InvocationExpressionSyntax ies)
+                    {
+                        AudioData newData = new AudioData(ies.Expression.GetText().ToString(),
+                            ies.GetLocation().GetLineSpan().StartLinePosition.Line,
+                            false,
+                            Instrument.codeBlock,
+                            MuteType.normal,
+                            false);
+
+                        newData.Length = 1;
+
+                        mvarInternalsData.Add(newData);
+                    }
                 }
             }
             else if (member is FieldDeclarationSyntax fs)
