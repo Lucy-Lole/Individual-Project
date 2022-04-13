@@ -77,10 +77,12 @@ namespace CodeSonification
 
                     double waitTime = (60.00 / CallingContext.BPM) * 1000;
 
-                    DateTime nextTime = DateTime.UtcNow.AddMilliseconds(waitTime);
+                    DateTime startTime = DateTime.UtcNow;
 
-                    while (DateTime.UtcNow < nextTime)
+                    while (DateTime.UtcNow < startTime.AddMilliseconds(waitTime))
                     {
+                        waitTime = (60.00 / CallingContext.BPM) * 1000;
+
                         // Busy wait until time has elapsed for the next beat.
                     }
                 }
