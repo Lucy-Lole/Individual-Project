@@ -10,6 +10,9 @@ namespace CodeSonification
     {
         piano,
         dust,
-        guitar
+        guitar,
+        field,
+        property,
+        codeBlock
     }
 }

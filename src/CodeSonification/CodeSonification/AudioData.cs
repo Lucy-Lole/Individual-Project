@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,6 +16,9 @@ namespace CodeSonification
         private Instrument mvarInstrument;
         private int mvarLine;
         private int mvarLength;
+        private TypeSyntax mvarReturnType;
+        private int mvarParamCount;
+        private string mvarParentMethod;
 
         public AudioData(string Name, int line, bool isStatic, Instrument instrument, MuteType mute, bool inherits)
         {
@@ -25,11 +29,32 @@ namespace CodeSonification
             mvarInstrument = instrument;
             mvarLine = line;
             mvarLength = 1;
+            mvarReturnType = null;
+            mvarParamCount = -1;
+            mvarParentMethod = null;
         }
 
         public int Line
         {
             get { return mvarLine; }
+        }
+
+        public string ParentMethod
+        {
+            get { return mvarParentMethod; }
+            set { mvarParentMethod = value; }
+        }
+
+        public int ParamCount
+        {
+            get { return mvarParamCount; } 
+            set { mvarParamCount = value; }
+        }
+
+        public TypeSyntax ReturnType
+        {
+            get { return mvarReturnType; }
+            set { mvarReturnType = value; }
         }
 
         public int Length
