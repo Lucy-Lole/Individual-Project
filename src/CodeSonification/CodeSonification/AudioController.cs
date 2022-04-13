@@ -61,13 +61,10 @@ namespace CodeSonification
                         return;
                     }
 
-
                     if (mvarCurrentAD.TryGetValue(i, out currentData))
                     {
                         PlaySound(currentData);
                     }
-
-                    double waitTime = (60.00 / CallingContext.BPM);
 
                     CallingContext.CurrentBeat++;
                     
@@ -78,7 +75,14 @@ namespace CodeSonification
                         mvarNewData = false;
                     }
 
-                    Thread.Sleep((int)(waitTime * 1000));
+                    double waitTime = (60.00 / CallingContext.BPM) * 1000;
+
+                    DateTime nextTime = DateTime.UtcNow.AddMilliseconds(waitTime);
+
+                    while (DateTime.UtcNow < nextTime)
+                    {
+                        // Busy wait until time has elapsed for the next beat.
+                    }
                 }
             }
         }
