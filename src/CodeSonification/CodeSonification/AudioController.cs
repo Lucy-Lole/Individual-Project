@@ -67,13 +67,6 @@ namespace CodeSonification
                     }
 
                     CallingContext.CurrentBeat++;
-                    
-                    if (mvarNewData)
-                    {
-                        mvarCurrentAD = new Dictionary<int, AudioData>(mvarHoldingData);
-                        mvarHoldingData = null;
-                        mvarNewData = false;
-                    }
 
                     double waitTime = (60.00 / CallingContext.BPM) * 1000;
 
@@ -81,6 +74,13 @@ namespace CodeSonification
 
                     while (DateTime.UtcNow < startTime.AddMilliseconds(waitTime))
                     {
+                        if (mvarNewData)
+                        {
+                            mvarCurrentAD = new Dictionary<int, AudioData>(mvarHoldingData);
+                            mvarHoldingData = null;
+                            mvarNewData = false;
+                        }
+
                         waitTime = (60.00 / CallingContext.BPM) * 1000;
 
                         // Busy wait until time has elapsed for the next beat.
