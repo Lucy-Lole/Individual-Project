@@ -24,6 +24,7 @@ namespace CodeSonification
         private List<AudioData> mvarCurrentData;
         private List<AudioData> mvarClassData;
         private List<AudioData> mvarMethodData;
+        private List<AudioData> mvarStaticsData;
         private List<AudioData> mvarInternalsData;
         private LayerState mvarLayer;
         private int mvarDataPosition;
@@ -89,7 +90,7 @@ namespace CodeSonification
             set { mvarCurrentFilePath = value; }
         }
 
-        public double Volume
+        public float Volume
         {
             get { return mvarSettings.Volume; }
             set { mvarSettings.Volume = value; }
@@ -121,6 +122,7 @@ namespace CodeSonification
             mvarClassData = new List<AudioData>();
             mvarMethodData = new List<AudioData>();
             mvarInternalsData = new List<AudioData>();
+            mvarStaticsData = new List<AudioData>();
             mvarLayer = LayerState.Method;
         }
 
@@ -145,20 +147,20 @@ namespace CodeSonification
             switch (mvarLayer)
             {
                 case LayerState.Class:
-                    mvarCurrentData = mvarClassData;
+                    mvarCurrentData = mvarClassData.Concat(mvarStaticsData).ToList();
                     break;
 
                 case LayerState.Method:
-                    mvarCurrentData = mvarMethodData;
+                    mvarCurrentData = mvarMethodData.Concat(mvarStaticsData).ToList();
                     break;
 
                 case LayerState.Internals:
-                    mvarCurrentData = mvarInternalsData;
+                    mvarCurrentData = mvarInternalsData.Concat(mvarStaticsData).ToList();
                     break;
 
                 case LayerState.All:
                 default:
-                    mvarCurrentData = mvarClassData.Concat(mvarMethodData.Concat(mvarInternalsData).ToList()).ToList();
+                    mvarCurrentData = mvarClassData.Concat(mvarMethodData.Concat(mvarInternalsData.Concat(mvarStaticsData).ToList()).ToList()).ToList();
                     break;
             }
 
@@ -382,6 +384,15 @@ namespace CodeSonification
 
                 mvarClassData.Add(newData);
 
+                AudioData endData = new AudioData(cs.Identifier.Text,
+                    cs.GetLocation().GetLineSpan().EndLinePosition.Line,
+                    false,
+                    Instrument.pianoEnd,
+                    cs.Modifiers.Count > 0 ? GetMuteType(cs.Modifiers.First().Text) : MuteType.normal,
+                    cs.BaseList != null);
+
+                mvarClassData.Add(endData);
+
                 foreach (var child in cs.Members)
                 {
                     RecurseFindData(child);
@@ -414,7 +425,7 @@ namespace CodeSonification
                     MuteType.normal,
                     false);
 
-                mvarClassData.Add(newData);
+                mvarStaticsData.Add(newData);
             }
 
             foreach (var member in root.Members)

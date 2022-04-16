@@ -9,12 +9,12 @@ namespace CodeSonification
     class Settings
     {
         private int mvarBPM;
-        private double mvarVolume;
+        private float mvarVolume;
 
         public Settings()
         {
             mvarBPM = 80;
-            mvarVolume = 0.5;
+            mvarVolume = 0.5f;
         }
 
         public int BPM
@@ -23,7 +23,7 @@ namespace CodeSonification
             set { mvarBPM = value; }
         }
 
-        public double Volume
+        public float Volume
         {
             get { return mvarVolume; }
             set { mvarVolume = value; }

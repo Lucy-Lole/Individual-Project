@@ -49,7 +49,7 @@ namespace CodeSonification
 
         private void VolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            mvarDataContext.Volume = e.NewValue;
+            mvarDataContext.Volume = (float)e.NewValue;
         }
 
         private void BPM_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)

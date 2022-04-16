@@ -44,6 +44,11 @@ namespace CodeSonification
             get { return mvarName; }
         }
 
+        public Instrument InstrumentType 
+        {
+            get { return mvarInstrument; }
+        }
+
         public string ParentMethod
         {
             get { return mvarParentMethod; }

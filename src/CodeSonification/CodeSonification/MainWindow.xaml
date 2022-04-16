@@ -44,7 +44,7 @@
 
             <StackPanel Orientation="Horizontal" Margin="-5">
                 <Label x:Name="VolumeLabel" Content="Volume:" VerticalAlignment="Center"/>
-                <Slider x:Name="VolumeSlider" ValueChanged="VolumeSlider_ValueChanged" Minimum="0.0" Maximum="1.0" VerticalAlignment="Center" Width="100"/>
+                <Slider x:Name="VolumeSlider" Value="0.5" ValueChanged="VolumeSlider_ValueChanged" Minimum="0.0" Maximum="1.0" SmallChange="0.1" VerticalAlignment="Center" Width="100"/>
             </StackPanel>
 
             <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="-5">

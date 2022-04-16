@@ -13,6 +13,7 @@ namespace CodeSonification
         guitar,
         field,
         property,
-        codeBlock
+        codeBlock,
+        pianoEnd
     }
 }
