@@ -123,7 +123,7 @@ namespace CodeSonification
             mvarMethodData = new List<AudioData>();
             mvarInternalsData = new List<AudioData>();
             mvarStaticsData = new List<AudioData>();
-            mvarLayer = LayerState.Method;
+            mvarLayer = LayerState.All;
         }
 
         public void IncrementPosition()
@@ -361,12 +361,57 @@ namespace CodeSonification
                     false);
 
                 newData.Length = ms.GetLocation().GetLineSpan().EndLinePosition.Line - ms.GetLocation().GetLineSpan().StartLinePosition.Line;
-                newData.ReturnType = ms.ReturnType;
                 newData.ParamCount = ms.ParameterList.Parameters.Count;
 
-                mvarMethodData.Add(newData);
 
-                foreach(StatementSyntax child in ms.Body.Statements)
+                AudioData endData = new AudioData(ms.Identifier.Text,
+                    ms.GetLocation().GetLineSpan().EndLinePosition.Line,
+                    false,
+                    Instrument.guitarEnd,
+                    ms.Modifiers.Count > 0 ? GetMuteType(ms.Modifiers.First().Text) : MuteType.normal,
+                    false);
+
+                endData.Length = 1;
+                endData.ParamCount = ms.ParameterList.Parameters.Count;
+
+                mvarMethodData.Add(newData);
+                mvarMethodData.Add(endData);
+
+                newData.ReturnType = ms.ReturnType;
+                endData.ReturnType = ms.ReturnType;
+
+                foreach (StatementSyntax child in ms.Body.Statements)
+                {
+                    RecurseFindData(child);
+                }
+            }
+            else if (member is ConstructorDeclarationSyntax xs)
+            {
+                AudioData newData = new AudioData(xs.Identifier.Text,
+                    xs.GetLocation().GetLineSpan().StartLinePosition.Line,
+                    false,
+                    Instrument.guitar,
+                    xs.Modifiers.Count > 0 ? GetMuteType(xs.Modifiers.First().Text) : MuteType.normal,
+                    false);
+
+                newData.Length = xs.GetLocation().GetLineSpan().EndLinePosition.Line - xs.GetLocation().GetLineSpan().StartLinePosition.Line;
+                newData.ParamCount = xs.ParameterList.Parameters.Count;
+
+
+                AudioData endData = new AudioData(xs.Identifier.Text,
+                    xs.GetLocation().GetLineSpan().EndLinePosition.Line,
+                    false,
+                    Instrument.guitarEnd,
+                    xs.Modifiers.Count > 0 ? GetMuteType(xs.Modifiers.First().Text) : MuteType.normal,
+                    false);
+
+                endData.Length = 1;
+                endData.ParamCount = xs.ParameterList.Parameters.Count;
+
+                mvarMethodData.Add(newData);
+                mvarMethodData.Add(endData);
+
+                foreach (StatementSyntax child in xs.Body.Statements)
                 {
                     RecurseFindData(child);
                 }
@@ -412,6 +457,11 @@ namespace CodeSonification
             mvarClassData = new List<AudioData>();
             mvarMethodData = new List<AudioData>();
             mvarInternalsData = new List<AudioData>();
+
+            if (mvarCurrentCodeText == null)
+            {
+                return;
+            }
 
             SyntaxTree tree = CSharpSyntaxTree.ParseText(mvarCurrentCodeText);
             CompilationUnitSyntax root = tree.GetCompilationUnitRoot();

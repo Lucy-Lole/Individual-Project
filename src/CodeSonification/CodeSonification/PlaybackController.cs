@@ -12,17 +12,31 @@ namespace CodeSonification
     {
         public float[] AudioData { get; private set; }
         public WaveFormat WaveFormat { get; private set; }
-        public CachedSound(string audioFileName)
+
+        private double mvarWholeTone = (Math.Pow(2, 1.0 / 12) * Math.Pow(2, 1.0 / 12));
+
+        public CachedSound(string audioFileName, int shiftAmnt = 0)
         {
             using (var audioFileReader = new AudioFileReader(audioFileName))
             {
-                MediaFoundationResampler resampler = new MediaFoundationResampler(audioFileReader, 44100);
+                WaveFormat = audioFileReader.WaveFormat;
 
-                WaveFormat = resampler.WaveFormat;
+                var shift = new SmbPitchShiftingSampleProvider(audioFileReader);
+
+                if (shiftAmnt > 0)
+                {
+                    shift.PitchFactor = (float)(shiftAmnt * mvarWholeTone);
+                }
+                else
+                {
+                    shift.PitchFactor = 1.0f;
+                }
+
+                
                 var wholeFile = new List<float>((int)(audioFileReader.Length / 4));
-                var readBuffer = new float[resampler.WaveFormat.SampleRate * resampler.WaveFormat.Channels];
+                var readBuffer = new float[shift.WaveFormat.SampleRate * shift.WaveFormat.Channels];
                 int samplesRead;
-                while ((samplesRead = audioFileReader.Read(readBuffer, 0, readBuffer.Length)) > 0)
+                while ((samplesRead = shift.Read(readBuffer, 0, readBuffer.Length)) > 0)
                 {
                     wholeFile.AddRange(readBuffer.Take(samplesRead));
                 }
@@ -33,47 +47,62 @@ namespace CodeSonification
 
     class CachedSoundSampleProvider : ISampleProvider
     {
-        private readonly CachedSound cachedSound;
-        private long position;
+        private CachedSound mvarSound;
+        private long mvarPosition;
+        private float mvarVol;
 
-        public CachedSoundSampleProvider(CachedSound cachedSound)
+        public CachedSoundSampleProvider(CachedSound cachedSound, float volume = 1.0f)
         {
-            this.cachedSound = cachedSound;
+            mvarSound = cachedSound;
+            mvarVol = volume;
         }
 
         public int Read(float[] buffer, int offset, int count)
         {
-            var availableSamples = cachedSound.AudioData.Length - position;
-            var samplesToCopy = Math.Min(availableSamples, count);
-            Array.Copy(cachedSound.AudioData, position, buffer, offset, samplesToCopy);
-            position += samplesToCopy;
+            long availableSamples = mvarSound.AudioData.Length - mvarPosition;
+            long samplesToCopy = Math.Min(availableSamples, count);
+
+            Array.Copy(mvarSound.AudioData, mvarPosition, buffer, offset, samplesToCopy);
+
+            for (int i = 0; i < count; i++)
+            {
+                buffer[offset + i] *= mvarVol;
+            }
+
+            
+            mvarPosition += samplesToCopy;
             return (int)samplesToCopy;
         }
 
-        public WaveFormat WaveFormat { get { return cachedSound.WaveFormat; } }
+        public WaveFormat WaveFormat
+        {
+            get { return mvarSound.WaveFormat; } 
+        }
     }
 
     class PlaybackController : IDisposable
     {
-        private readonly IWavePlayer outputDevice;
-        private readonly MixingSampleProvider mixer;
+        private IWavePlayer mvarOutputDevice;
+        private MixingSampleProvider mvarMixer;
+        private VolumeSampleProvider mvarVolProv;
 
         public PlaybackController(int sampleRate = 44100, int channelCount = 2)
         {
-            outputDevice = new WaveOutEvent();
-            mixer = new MixingSampleProvider(WaveFormat.CreateIeeeFloatWaveFormat(sampleRate, channelCount));
-            mixer.ReadFully = true;
-            outputDevice.Init(mixer);
-            outputDevice.Play();
+            mvarOutputDevice = new WaveOutEvent();
+            mvarMixer = new MixingSampleProvider(WaveFormat.CreateIeeeFloatWaveFormat(sampleRate, channelCount));
+            mvarMixer.ReadFully = true;
+            mvarVolProv = new VolumeSampleProvider(mvarMixer);
+            mvarOutputDevice.Init(mvarVolProv);
+            mvarOutputDevice.Play();
         }
 
         private ISampleProvider ConvertToRightChannelCount(ISampleProvider input)
         {
-            if (input.WaveFormat.Channels == mixer.WaveFormat.Channels)
+            if (input.WaveFormat.Channels == mvarMixer.WaveFormat.Channels)
             {
                 return input;
             }
-            if (input.WaveFormat.Channels == 1 && mixer.WaveFormat.Channels == 2)
+            if (input.WaveFormat.Channels == 1 && mvarMixer.WaveFormat.Channels == 2)
             {
                 return new MonoToStereoSampleProvider(input);
             }
@@ -82,22 +111,18 @@ namespace CodeSonification
 
         public void PlaySound(CachedSound sound, float volume)
         {
-            outputDevice.Volume = volume;
-            AddMixerInput(new CachedSoundSampleProvider(sound));
+            mvarOutputDevice.Volume = 1.0f;
+            AddMixerInput(new CachedSoundSampleProvider(sound, volume));
         }
 
         private void AddMixerInput(ISampleProvider input)
         {
-            mixer.AddMixerInput(ConvertToRightChannelCount(input));
+            mvarMixer.AddMixerInput(ConvertToRightChannelCount(input));
         }
 
         public void Dispose()
         {
-            outputDevice.Dispose();
+            mvarOutputDevice.Dispose();
         }
-
-        public static readonly PlaybackController Instance = new PlaybackController(44100, 2);
     }
-
-
 }
