@@ -15,6 +15,9 @@ namespace CodeSonification
         property,
         codeBlock,
         pianoEnd,
-        guitarEnd
+        guitarEnd,
+        codeBlockEnd,
+        expression,
+        namesp
     }
 }

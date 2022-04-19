@@ -37,6 +37,7 @@ namespace CodeSonification
         public int Line
         {
             get { return mvarLine; }
+            set { mvarLine = value; }
         }
 
         public string Name

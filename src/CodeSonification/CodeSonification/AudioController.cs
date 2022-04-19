@@ -10,11 +10,16 @@ namespace CodeSonification
     class AudioController
     {
 
-        Dictionary<int, AudioData> mvarCurrentAD;
-        Dictionary<int, AudioData> mvarHoldingData;
+        Dictionary<int, List<AudioData>> mvarCurrentAD;
+        Dictionary<int, List<AudioData>> mvarHoldingData;
 
         PlaybackController mvarDustOut;
+        PlaybackController mvarNamespaceOut;
         PlaybackController mvarOtherOut;
+
+        int mvarIndentLevel = 0;
+
+        bool mvarInNamespace = false;
 
         const int mvarMaxDust = 10;
 
@@ -26,36 +31,40 @@ namespace CodeSonification
 
         public AudioController()
         {
-            mvarCurrentAD = new Dictionary<int, AudioData>();
+            mvarCurrentAD = new Dictionary<int, List<AudioData>>();
             mvarSounds = new Dictionary<string, CachedSound>();
             mvarDustSoundLevel = 0;
-            mvarSounds["dust"] = new CachedSound("C:\\Users\\Lucy\\Desktop\\COMS\\Individual-Project\\src\\CodeSonification\\CodeSonification\\Dust.wav");
+            mvarSounds["dust"] = new CachedSound(".\\Resources\\dust.wav");
 
-            mvarSounds["piano"] = new CachedSound("C:\\Users\\Lucy\\Desktop\\COMS\\Individual-Project\\src\\CodeSonification\\CodeSonification\\Piano.wav");
-            mvarSounds["pianoSlight"] = new CachedSound("C:\\Users\\Lucy\\Desktop\\COMS\\Individual-Project\\src\\CodeSonification\\CodeSonification\\PianoSlight.wav");
-            mvarSounds["pianoDull"] = new CachedSound("C:\\Users\\Lucy\\Desktop\\COMS\\Individual-Project\\src\\CodeSonification\\CodeSonification\\PianoDull.wav");
+            mvarSounds["piano"] = new CachedSound(".\\Resources\\Piano.wav");
+            mvarSounds["pianoSlight"] = new CachedSound(".\\Resources\\PianoSlight.wav");
+            mvarSounds["pianoDull"] = new CachedSound(".\\Resources\\PianoDull.wav");
 
-            mvarSounds["pianoWB"] = new CachedSound("C:\\Users\\Lucy\\Desktop\\COMS\\Individual-Project\\src\\CodeSonification\\CodeSonification\\PianoWB.wav");
-            mvarSounds["pianoWBSlight"] = new CachedSound("C:\\Users\\Lucy\\Desktop\\COMS\\Individual-Project\\src\\CodeSonification\\CodeSonification\\PianoWBSlight.wav");
-            mvarSounds["pianoWBDull"] = new CachedSound("C:\\Users\\Lucy\\Desktop\\COMS\\Individual-Project\\src\\CodeSonification\\CodeSonification\\PianoWBDull.wav");
+            mvarSounds["pianoWB"] = new CachedSound(".\\Resources\\PianoWB.wav");
+            mvarSounds["pianoWBSlight"] = new CachedSound(".\\Resources\\PianoWBSlight.wav");
+            mvarSounds["pianoWBDull"] = new CachedSound(".\\Resources\\PianoWBDull.wav");
 
-            mvarSounds["pianoEnd"] = new CachedSound("C:\\Users\\Lucy\\Desktop\\COMS\\Individual-Project\\src\\CodeSonification\\CodeSonification\\PianoEnd.wav");
-            mvarSounds["pianoEndSlight"] = new CachedSound("C:\\Users\\Lucy\\Desktop\\COMS\\Individual-Project\\src\\CodeSonification\\CodeSonification\\PianoEndSlight.wav");
-            mvarSounds["pianoEndDull"] = new CachedSound("C:\\Users\\Lucy\\Desktop\\COMS\\Individual-Project\\src\\CodeSonification\\CodeSonification\\PianoEndDull.wav");
+            mvarSounds["pianoEnd"] = new CachedSound(".\\Resources\\PianoEnd.wav");
+            mvarSounds["pianoEndSlight"] = new CachedSound(".\\Resources\\PianoEndSlight.wav");
+            mvarSounds["pianoEndDull"] = new CachedSound(".\\Resources\\PianoEndDull.wav");
 
-            mvarSounds["methodStart"] = new CachedSound("C:\\Users\\Lucy\\Desktop\\COMS\\Individual-Project\\src\\CodeSonification\\CodeSonification\\methodStart.wav");
-            mvarSounds["methodStartSlight"] = new CachedSound("C:\\Users\\Lucy\\Desktop\\COMS\\Individual-Project\\src\\CodeSonification\\CodeSonification\\methodStartSlight.wav");
-            mvarSounds["methodStartDull"] = new CachedSound("C:\\Users\\Lucy\\Desktop\\COMS\\Individual-Project\\src\\CodeSonification\\CodeSonification\\methodStartDull.wav");
+            mvarSounds["methodStart"] = new CachedSound(".\\Resources\\methodStart.wav");
+            mvarSounds["methodStartSlight"] = new CachedSound(".\\Resources\\methodStartSlight.wav");
+            mvarSounds["methodStartDull"] = new CachedSound(".\\Resources\\methodStartDull.wav");
 
-            mvarSounds["methodEnd"] = new CachedSound("C:\\Users\\Lucy\\Desktop\\COMS\\Individual-Project\\src\\CodeSonification\\CodeSonification\\methodEnd.wav");
-            mvarSounds["methodEndSlight"] = new CachedSound("C:\\Users\\Lucy\\Desktop\\COMS\\Individual-Project\\src\\CodeSonification\\CodeSonification\\methodEndSlight.wav");
-            mvarSounds["methodEndDull"] = new CachedSound("C:\\Users\\Lucy\\Desktop\\COMS\\Individual-Project\\src\\CodeSonification\\CodeSonification\\methodEndDull.wav");
+            mvarSounds["methodEnd"] = new CachedSound(".\\Resources\\methodEnd.wav");
+            mvarSounds["methodEndSlight"] = new CachedSound(".\\Resources\\methodEndSlight.wav");
+            mvarSounds["methodEndDull"] = new CachedSound(".\\Resources\\methodEndDull.wav");
 
-            mvarSounds["field"] = new CachedSound("C:\\Users\\Lucy\\Desktop\\COMS\\Individual-Project\\src\\CodeSonification\\CodeSonification\\field.wav");
-            mvarSounds["property"] = new CachedSound("C:\\Users\\Lucy\\Desktop\\COMS\\Individual-Project\\src\\CodeSonification\\CodeSonification\\property.wav");
+            mvarSounds["field"] = new CachedSound(".\\Resources\\field.wav");
+            mvarSounds["property"] = new CachedSound(".\\Resources\\property.wav");
+
+            mvarSounds["birds"] = new CachedSound(".\\Resources\\birds.wav");
+            mvarSounds["namespace"] = new CachedSound(".\\Resources\\namespace.wav");
 
             mvarDustOut = new PlaybackController();
             mvarOtherOut = new PlaybackController();
+            mvarNamespaceOut = new PlaybackController();
 
         }
 
@@ -66,11 +75,25 @@ namespace CodeSonification
                 case Instrument.dust:
                     mvarDustSoundLevel += 1;
                     break;
+                case Instrument.namesp:
+                    mvarInNamespace = !mvarInNamespace;
+                    break;
+                case Instrument.codeBlock:
+                    mvarOtherOut.PlaySound(new CachedSound(".\\Resources\\codeBlock.wav", mvarIndentLevel), vol);
+                    mvarIndentLevel++;
+                    break;
+                case Instrument.codeBlockEnd:
+                    mvarIndentLevel--;
+                    mvarOtherOut.PlaySound(new CachedSound(".\\Resources\\codeBlock.wav", mvarIndentLevel), vol);
+                    break;
                 case Instrument.field:
                     mvarOtherOut.PlaySound(mvarSounds["field"], vol);
                     break;
                 case Instrument.property:
                     mvarOtherOut.PlaySound(mvarSounds["property"], vol);
+                    break;
+                case Instrument.expression:
+                    mvarOtherOut.PlaySound(mvarSounds["birds"], vol);
                     break;
                 case Instrument.guitar:
                     if (data.Mute == MuteType.slight)
@@ -154,16 +177,21 @@ namespace CodeSonification
             System.Diagnostics.Debug.WriteLine("Played " + data.Name + " on line " + data.Line);
         }
 
-        public static Dictionary<int, AudioData> CreateAudioDict(List<AudioData> data)
+        public static Dictionary<int, List<AudioData>> CreateAudioDict(List<AudioData> data)
         {
-            Dictionary<int, AudioData> newDict = new Dictionary<int, AudioData>();
+            Dictionary<int, List<AudioData>> newDict = new Dictionary<int, List<AudioData>>();
 
 
             foreach (AudioData ad in data)
             {
                 if (!newDict.ContainsKey(ad.Line))
                 {
-                    newDict.Add(ad.Line, ad);
+                    newDict.Add(ad.Line, new List<AudioData>());
+                    newDict[ad.Line].Add(ad);
+                }
+                else
+                {
+                    newDict[ad.Line].Add(ad);
                 }
             }
 
@@ -171,7 +199,7 @@ namespace CodeSonification
             return newDict;
         }
 
-        public void ChangeAudioData(Dictionary<int, AudioData> newDict)
+        public void ChangeAudioData(Dictionary<int, List<AudioData>> newDict)
         {
             mvarHoldingData = newDict;
             mvarNewData = true;
@@ -185,7 +213,7 @@ namespace CodeSonification
             {
                 mvarCurrentAD = CreateAudioDict(CallingContext.CurrentData);
 
-                AudioData currentData = null;
+                List<AudioData> currentData = null;
 
                 int i = 0;
 
@@ -201,9 +229,17 @@ namespace CodeSonification
                         mvarDustOut.PlaySound(mvarSounds["dust"], CallingContext.Volume * (mvarDustSoundLevel < mvarMaxDust ? (float)mvarDustSoundLevel / mvarMaxDust : 1.0f));
                     }
 
+                    if (mvarInNamespace)
+                    {
+                        mvarNamespaceOut.PlaySound(mvarSounds["namespace"], CallingContext.Volume);
+                    }
+
                     if (mvarCurrentAD.TryGetValue(i, out currentData))
                     {
-                        PlaySound(currentData, CallingContext.Volume);
+                        foreach (var sound in currentData)
+                        {
+                            PlaySound(sound, CallingContext.Volume);
+                        }
                     }
 
                     CallingContext.CurrentBeat++;
@@ -216,7 +252,7 @@ namespace CodeSonification
                     {
                         if (mvarNewData)
                         {
-                            mvarCurrentAD = new Dictionary<int, AudioData>(mvarHoldingData);
+                            mvarCurrentAD = new Dictionary<int, List<AudioData>>(mvarHoldingData);
                             mvarHoldingData = null;
                             mvarNewData = false;
                         }

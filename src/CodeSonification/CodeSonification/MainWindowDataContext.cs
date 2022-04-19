@@ -166,7 +166,7 @@ namespace CodeSonification
 
             if (mvarPlaybackState == PlaybackState.Playing)
             {
-                Dictionary<int, AudioData> newData = new Dictionary<int, AudioData>();
+                Dictionary<int, List<AudioData>> newData = new Dictionary<int, List<AudioData>>();
 
                 newData = AudioController.CreateAudioDict(mvarCurrentData);
 
@@ -220,8 +220,17 @@ namespace CodeSonification
                         }
                     }
 
+                    AudioData endData = new AudioData(ifs.Condition.ToString() + " END",
+                        ifs.GetLocation().GetLineSpan().EndLinePosition.Line,
+                        false,
+                        Instrument.codeBlockEnd,
+                        MuteType.normal,
+                        false);
+
                     if (ifs.Else != null)
                     {
+                        endData.Line = ifs.Else.GetLocation().GetLineSpan().StartLinePosition.Line - 1;
+
                         if (ifs.Else.Statement is BlockSyntax ebs)
                         {
                             AudioData elseData = new AudioData("else " + ebs.GetLocation().GetLineSpan().StartLinePosition.Line,
@@ -239,11 +248,22 @@ namespace CodeSonification
                             {
                                 RecurseFindData(child);
                             }
+
+                            AudioData elseEndData = new AudioData("else " + ebs.GetLocation().GetLineSpan().EndLinePosition.Line + " END",
+                                ebs.GetLocation().GetLineSpan().EndLinePosition.Line,
+                                false,
+                                Instrument.codeBlockEnd,
+                                MuteType.normal,
+                                false);
+
+                            mvarInternalsData.Add(elseEndData);
                         }
 
 
                         RecurseFindData(ifs.Else.Statement);
                     }
+
+                    mvarInternalsData.Add(endData);
                 }
                 else if (st is ForStatementSyntax fss)
                 {
@@ -256,6 +276,8 @@ namespace CodeSonification
 
                     newData.Length = fss.GetLocation().GetLineSpan().EndLinePosition.Line - fss.GetLocation().GetLineSpan().StartLinePosition.Line;
 
+                    mvarInternalsData.Add(newData);
+
                     if (fss.Statement is BlockSyntax bs)
                     {
                         foreach (var child in bs.Statements)
@@ -264,7 +286,14 @@ namespace CodeSonification
                         }
                     }
 
-                    mvarInternalsData.Add(newData);
+                    AudioData endData = new AudioData(fss.Condition.ToString() + " END",
+                        fss.GetLocation().GetLineSpan().EndLinePosition.Line,
+                        false,
+                        Instrument.codeBlockEnd,
+                        MuteType.normal,
+                        false);
+
+                    mvarInternalsData.Add(endData);
                 }
                 else if (st is WhileStatementSyntax wss)
                 {
@@ -277,6 +306,8 @@ namespace CodeSonification
 
                     newData.Length = wss.GetLocation().GetLineSpan().EndLinePosition.Line - wss.GetLocation().GetLineSpan().StartLinePosition.Line;
 
+                    mvarInternalsData.Add(newData);
+
                     if (wss.Statement is BlockSyntax bs)
                     {
                         foreach (var child in bs.Statements)
@@ -285,7 +316,44 @@ namespace CodeSonification
                         }
                     }
 
+                    AudioData endData = new AudioData(wss.Condition.ToString() + " END",
+                        wss.GetLocation().GetLineSpan().EndLinePosition.Line,
+                        false,
+                        Instrument.codeBlockEnd,
+                        MuteType.normal,
+                        false);
+
+                    mvarInternalsData.Add(endData);
+                }
+                else if (st is UsingStatementSyntax uss)
+                {
+                    AudioData newData = new AudioData(uss.Declaration.ToString(),
+                        uss.GetLocation().GetLineSpan().StartLinePosition.Line,
+                        false,
+                        Instrument.codeBlock,
+                        MuteType.normal,
+                        false);
+
+                    newData.Length = uss.GetLocation().GetLineSpan().EndLinePosition.Line - uss.GetLocation().GetLineSpan().StartLinePosition.Line;
+
                     mvarInternalsData.Add(newData);
+
+                    if (uss.Statement is BlockSyntax bs)
+                    {
+                        foreach (var child in bs.Statements)
+                        {
+                            RecurseFindData(child);
+                        }
+                    }
+
+                    AudioData endData = new AudioData(uss.Declaration.ToString() + " END",
+                        uss.GetLocation().GetLineSpan().EndLinePosition.Line,
+                        false,
+                        Instrument.codeBlockEnd,
+                        MuteType.normal,
+                        false);
+
+                    mvarInternalsData.Add(endData);
                 }
                 else if (st is ForEachStatementSyntax fess)
                 {
@@ -298,6 +366,8 @@ namespace CodeSonification
 
                     newData.Length = fess.GetLocation().GetLineSpan().EndLinePosition.Line - fess.GetLocation().GetLineSpan().StartLinePosition.Line;
 
+                    mvarInternalsData.Add(newData);
+
                     if (fess.Statement is BlockSyntax bs)
                     {
                         foreach (var child in bs.Statements)
@@ -306,7 +376,14 @@ namespace CodeSonification
                         }
                     }
 
-                    mvarInternalsData.Add(newData);
+                    AudioData endData = new AudioData(fess.Expression.GetText().ToString() + " END",
+                        fess.GetLocation().GetLineSpan().EndLinePosition.Line,
+                        false,
+                        Instrument.codeBlockEnd,
+                        MuteType.normal,
+                        false);
+
+                    mvarInternalsData.Add(endData);
                 }
                 else if (st is ExpressionStatementSyntax ess)
                 {
@@ -315,7 +392,7 @@ namespace CodeSonification
                         AudioData newData = new AudioData(ies.Expression.GetText().ToString(),
                             ies.GetLocation().GetLineSpan().StartLinePosition.Line,
                             false,
-                            Instrument.codeBlock,
+                            Instrument.expression,
                             MuteType.normal,
                             false);
 
@@ -445,6 +522,26 @@ namespace CodeSonification
             }
             else if (member is NamespaceDeclarationSyntax ns)
             {
+                AudioData newData = new AudioData(ns.Name.ToString(),
+                    ns.GetLocation().GetLineSpan().StartLinePosition.Line,
+                    true,
+                    Instrument.namesp,
+                    MuteType.normal,
+                    false);
+
+                newData.Length = ns.GetLocation().GetLineSpan().EndLinePosition.Line - ns.GetLocation().GetLineSpan().StartLinePosition.Line;
+
+                mvarClassData.Add(newData);
+
+                AudioData endData = new AudioData(ns.Name.ToString() + " END",
+                    ns.GetLocation().GetLineSpan().EndLinePosition.Line,
+                    true,
+                    Instrument.namesp,
+                    MuteType.normal,
+                    false);
+
+                mvarClassData.Add(endData);
+
                 foreach (var child in ns.Members)
                 {
                     RecurseFindData(child);

@@ -13,8 +13,6 @@ namespace CodeSonification
         public float[] AudioData { get; private set; }
         public WaveFormat WaveFormat { get; private set; }
 
-        private double mvarWholeTone = (Math.Pow(2, 1.0 / 12) * Math.Pow(2, 1.0 / 12));
-
         public CachedSound(string audioFileName, int shiftAmnt = 0)
         {
             using (var audioFileReader = new AudioFileReader(audioFileName))
@@ -25,7 +23,7 @@ namespace CodeSonification
 
                 if (shiftAmnt > 0)
                 {
-                    shift.PitchFactor = (float)(shiftAmnt * mvarWholeTone);
+                    shift.PitchFactor = (float)Math.Pow(Math.Pow(2, 1.0 / 12), shiftAmnt);
                 }
                 else
                 {
