@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace CodeSonification
 {
-    class AudioController
+    public class AudioController
     {
 
         Dictionary<int, List<AudioData>> mvarCurrentAD;
@@ -68,7 +68,7 @@ namespace CodeSonification
 
         }
 
-        private void PlaySound(AudioData data, float vol)
+        public void PlaySound(AudioData data, float vol)
         {
             switch (data.InstrumentType)
             {

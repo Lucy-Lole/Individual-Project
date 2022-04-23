@@ -100,6 +100,11 @@ namespace CodeSonification
                 }
                 e.Handled = true;
             }
+            else if (e.Key == System.Windows.Input.Key.Space && e.KeyboardDevice.Modifiers == System.Windows.Input.ModifierKeys.Control)
+            {
+                mvarDataContext.PlayLine(CodeTextBox.GetLineIndexFromCharacterIndex(CodeTextBox.CaretIndex));
+                e.Handled = true;
+            }
         }
 
         private void Window_Closed(object sender, System.EventArgs e)

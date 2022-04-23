@@ -142,6 +142,21 @@ namespace CodeSonification
             }
         }
 
+        public void PlayLine(int line)
+        {
+            GetAudioData();
+
+            var dict = AudioController.CreateAudioDict(mvarClassData.Concat(mvarMethodData.Concat(mvarInternalsData.Concat(mvarStaticsData).ToList()).ToList()).ToList());
+
+            if (dict.TryGetValue(line, out var val))
+            {
+                foreach(var ad in val)
+                {
+                    mvarAudioController.PlaySound(ad, mvarSettings.Volume);
+                }
+            }
+        }
+
         private void ApplyCurrentLayer()
         {
             switch (mvarLayer)

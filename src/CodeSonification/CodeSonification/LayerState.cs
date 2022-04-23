@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CodeSonification
 {
-    enum LayerState
+    public enum LayerState
     {
         All,
         Class,

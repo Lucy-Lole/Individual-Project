@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CodeSonification
 {
-    enum Instrument
+    public enum Instrument
     {
         piano,
         dust,

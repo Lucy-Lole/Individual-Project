@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace CodeSonification
 {
-    class AudioData
+    public class AudioData
     {
         private bool mvarStaticSound;
         private bool mvarInherits;

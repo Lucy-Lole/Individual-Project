@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CodeSonification
 {
-    enum MuteType
+    public enum MuteType
     {
         normal,
         slight,
