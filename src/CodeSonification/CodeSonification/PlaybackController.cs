@@ -1,83 +1,9 @@
 ﻿using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CodeSonification
 {
-    class CachedSound
-    {
-        public float[] AudioData { get; private set; }
-        public WaveFormat WaveFormat { get; private set; }
-
-        public CachedSound(string audioFileName, int shiftAmnt = 0)
-        {
-            using (var audioFileReader = new AudioFileReader(audioFileName))
-            {
-                WaveFormat = audioFileReader.WaveFormat;
-
-                var shift = new SmbPitchShiftingSampleProvider(audioFileReader);
-
-                if (shiftAmnt > 0)
-                {
-                    shift.PitchFactor = (float)Math.Pow(Math.Pow(2, 1.0 / 12), shiftAmnt);
-                }
-                else
-                {
-                    shift.PitchFactor = 1.0f;
-                }
-
-                
-                var wholeFile = new List<float>((int)(audioFileReader.Length / 4));
-                var readBuffer = new float[shift.WaveFormat.SampleRate * shift.WaveFormat.Channels];
-                int samplesRead;
-                while ((samplesRead = shift.Read(readBuffer, 0, readBuffer.Length)) > 0)
-                {
-                    wholeFile.AddRange(readBuffer.Take(samplesRead));
-                }
-                AudioData = wholeFile.ToArray();
-            }
-        }
-    }
-
-    class CachedSoundSampleProvider : ISampleProvider
-    {
-        private CachedSound mvarSound;
-        private long mvarPosition;
-        private float mvarVol;
-
-        public CachedSoundSampleProvider(CachedSound cachedSound, float volume = 1.0f)
-        {
-            mvarSound = cachedSound;
-            mvarVol = volume;
-        }
-
-        public int Read(float[] buffer, int offset, int count)
-        {
-            long availableSamples = mvarSound.AudioData.Length - mvarPosition;
-            long samplesToCopy = Math.Min(availableSamples, count);
-
-            Array.Copy(mvarSound.AudioData, mvarPosition, buffer, offset, samplesToCopy);
-
-            for (int i = 0; i < count; i++)
-            {
-                buffer[offset + i] *= mvarVol;
-            }
-
-            
-            mvarPosition += samplesToCopy;
-            return (int)samplesToCopy;
-        }
-
-        public WaveFormat WaveFormat
-        {
-            get { return mvarSound.WaveFormat; } 
-        }
-    }
-
     class PlaybackController : IDisposable
     {
         private IWavePlayer mvarOutputDevice;
@@ -87,9 +13,12 @@ namespace CodeSonification
         public PlaybackController(int sampleRate = 44100, int channelCount = 2)
         {
             mvarOutputDevice = new WaveOutEvent();
+
             mvarMixer = new MixingSampleProvider(WaveFormat.CreateIeeeFloatWaveFormat(sampleRate, channelCount));
             mvarMixer.ReadFully = true;
+
             mvarVolProv = new VolumeSampleProvider(mvarMixer);
+
             mvarOutputDevice.Init(mvarVolProv);
             mvarOutputDevice.Play();
         }
