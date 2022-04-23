@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CodeSonification"
         mc:Ignorable="d"
-        Title="Code Sonification" Height="450" Width="850"
+        Title="Code Sonification" Height="900" Width="850"
         PreviewKeyDown="Window_KeyDown"
         Closed="Window_Closed">
     <Window.Resources>
@@ -73,6 +73,6 @@
 
         <Button Grid.Column="5" HorizontalAlignment="Right" Name="Import" Content="Import" Click="Import_Click" Height="60" Width="80" Margin="5"/>
 
-        <TextBox x:Name="CodeTextBox" Grid.Row="2" Grid.ColumnSpan="6" Margin="5" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Text="{Binding Path=CurrentCodeText, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+        <TextBox x:Name="CodeTextBox" AcceptsTab="True" AcceptsReturn="True" Grid.Row="2" Grid.ColumnSpan="6" Margin="5" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Text="{Binding Path=CurrentCodeText, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
     </Grid>
 </Window>

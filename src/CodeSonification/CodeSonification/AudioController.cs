@@ -208,6 +208,8 @@ namespace CodeSonification
         public void StartPlayback(object data, object ct)
         {
             mvarDustSoundLevel = 0;
+            mvarIndentLevel = 0;
+            mvarInNamespace = false;
 
             if (data is MainWindowDataContext CallingContext && ct is CancellationToken token)
             {
