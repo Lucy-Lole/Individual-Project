@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Threading;
 
 namespace CodeSonification
@@ -18,14 +15,25 @@ namespace CodeSonification
         PlaybackController mvarOtherOut;
 
         int mvarIndentLevel = 0;
-
         bool mvarInNamespace = false;
-
         const int mvarMaxDust = 10;
-
         bool mvarNewData;
-
         int mvarDustSoundLevel;
+
+        public int IndentLevel
+        {
+            get { return mvarIndentLevel; }
+        }
+
+        public bool InNamespace
+        {
+            get { return mvarInNamespace; }
+        }
+
+        public Dictionary<int, List<AudioData>> CurrentAudioData
+        {
+            get { return mvarCurrentAD; }
+        }
 
         Dictionary<string, CachedSound> mvarSounds;
 
@@ -68,6 +76,11 @@ namespace CodeSonification
 
         }
 
+        /// <summary>
+        /// Plays the sound that corresponds to the given AudioData.
+        /// </summary>
+        /// <param name="data">AudioData to play</param>
+        /// <param name="vol">Volume to play at</param>
         public void PlaySound(AudioData data, float vol)
         {
             switch (data.InstrumentType)
@@ -177,6 +190,11 @@ namespace CodeSonification
             System.Diagnostics.Debug.WriteLine("Played " + data.Name + " on line " + data.Line);
         }
 
+        /// <summary>
+        /// Creates an dictionary of AudioData mapped to line number.
+        /// </summary>
+        /// <param name="data">List of AudioData to convert into dictionary</param>
+        /// <returns>Dictionary of AudioData mapped to line number</returns>
         public static Dictionary<int, List<AudioData>> CreateAudioDict(List<AudioData> data)
         {
             Dictionary<int, List<AudioData>> newDict = new Dictionary<int, List<AudioData>>();
@@ -199,12 +217,21 @@ namespace CodeSonification
             return newDict;
         }
 
+        /// <summary>
+        /// Changes the dictionary of AudioData that the playback thread is currently playing.
+        /// </summary>
+        /// <param name="newDict">Dictionary of AudioData to play</param>
         public void ChangeAudioData(Dictionary<int, List<AudioData>> newDict)
         {
             mvarHoldingData = newDict;
             mvarNewData = true;
         }
 
+        /// <summary>
+        /// Begins playback, utilizing the DataContext passed for AudioData information and BPM.
+        /// </summary>
+        /// <param name="data">Must be a initialised MainWindowDataContext object</param>
+        /// <param name="ct">Must be a CancellationToken so that the thread can be stopped</param>
         public void StartPlayback(object data, object ct)
         {
             mvarDustSoundLevel = 0;

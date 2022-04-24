@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CodeSonification
 {
-    enum PlaybackState
+    public enum PlaybackState
     {
         Stopped,
         Playing

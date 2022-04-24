@@ -1,5 +1,4 @@
 ﻿using System.Windows;
-using System.IO;
 using Microsoft.Win32;
 using System.Windows.Controls;
 
@@ -15,25 +14,16 @@ namespace CodeSonification
         public MainWindow()
         {
             mvarDataContext = new MainWindowDataContext();
-
             DataContext = mvarDataContext;
-
             InitializeComponent();
         }
 
         private void Import_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog dlg = new OpenFileDialog();
-            string path;
-
             dlg.ShowDialog();
-            if (dlg.FileName != "")
-            {
-                path = dlg.FileName;
 
-                mvarDataContext.CurrentFilePath = path;
-                mvarDataContext.CurrentCodeText = File.ReadAllText(path);
-            }
+            mvarDataContext.HandleImport(dlg.FileName);
         }
 
         private void Run_Click(object sender, RoutedEventArgs e)
@@ -44,7 +34,6 @@ namespace CodeSonification
         private void Reset_Click(object sender, RoutedEventArgs e)
         {
             mvarDataContext.StopPlayback();
-            // Stop 'playback'.
         }
 
         private void VolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -61,50 +50,18 @@ namespace CodeSonification
         {
             if (sender is RadioButton rb)
             {
-                LayerState chosenLayer = LayerState.All;
-
-                if (rb.Name == "ClassButton")
-                {
-                    chosenLayer = LayerState.Class;
-                }
-                else if (rb.Name == "MethodButton")
-                {
-                    chosenLayer = LayerState.Method;
-                }
-                else if (rb.Name == "InternalButton")
-                {
-                    chosenLayer = LayerState.Internals;
-                }
-
-                mvarDataContext.ChangeLayer(chosenLayer);
+                mvarDataContext.ChangeLayer(rb.Name);
             }
         }
 
         private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
-            if (e.Key == System.Windows.Input.Key.Left)
-            {
-                if (mvarDataContext.Layer != LayerState.All)
-                {
-                    mvarDataContext.ChangeLayer(mvarDataContext.Layer - 1);
-                }
-
-                e.Handled = true;
-            }
-            else if (e.Key == System.Windows.Input.Key.Right)
-            {
-
-                if (mvarDataContext.Layer != LayerState.Internals)
-                {
-                    mvarDataContext.ChangeLayer(mvarDataContext.Layer + 1);
-                }
-                e.Handled = true;
-            }
-            else if (e.Key == System.Windows.Input.Key.Space && e.KeyboardDevice.Modifiers == System.Windows.Input.ModifierKeys.Control)
+            KeyData kd = new KeyData(e.Key, e.KeyboardDevice.Modifiers);
+            if(mvarDataContext.HandleKeyPress(ref kd))
             {
                 mvarDataContext.PlayLine(CodeTextBox.GetLineIndexFromCharacterIndex(CodeTextBox.CaretIndex));
-                e.Handled = true;
             }
+            e.Handled = kd.HandledState;
         }
 
         private void Window_Closed(object sender, System.EventArgs e)

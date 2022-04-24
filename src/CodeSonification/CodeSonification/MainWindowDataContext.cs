@@ -1,20 +1,17 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CSharp;
 using System;
-using System.CodeDom;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
+using System.Windows.Input;
 
 namespace CodeSonification
 {
-    class MainWindowDataContext : INotifyPropertyChanged
+    public class MainWindowDataContext : INotifyPropertyChanged
     {
         private string mvarCurrentFilePath;
         private string mvarCurrentCodeText;
@@ -27,7 +24,6 @@ namespace CodeSonification
         private List<AudioData> mvarStaticsData;
         private List<AudioData> mvarInternalsData;
         private LayerState mvarLayer;
-        private int mvarDataPosition;
         private int mvarCurrentBeat;
         private int mvarTotalBeats;
 
@@ -44,7 +40,7 @@ namespace CodeSonification
         public LayerState Layer
         {
             get { return mvarLayer; }
-            private set
+            set
             {
                 mvarLayer = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Layer"));
@@ -107,15 +103,11 @@ namespace CodeSonification
             get { return mvarPlaybackState; }
         }
 
-        private string[] mvarClassKeywords = {"public", "private", "protected", "internal"};
-
-        
         public MainWindowDataContext()
         {
             mvarCurrentFilePath = "";
             mvarSettings = new Settings();
             mvarPlaybackState = PlaybackState.Stopped;
-            mvarDataPosition = 0;
             mvarCurrentBeat = 0;
             mvarAudioController = new AudioController();
             mvarCurrentData = new List<AudioData>();
@@ -126,22 +118,10 @@ namespace CodeSonification
             mvarLayer = LayerState.All;
         }
 
-        public void IncrementPosition()
-        {
-            if (mvarDataPosition < mvarCurrentData.Count())
-            {
-                mvarDataPosition++;
-            }
-        }
-
-        public void DecrementPosition()
-        {
-            if (mvarDataPosition > 0)
-            {
-                mvarDataPosition--;
-            }
-        }
-
+        /// <summary>
+        /// Makes the AudioController play whatever is on the given line.
+        /// </summary>
+        /// <param name="line">Line to play</param>
         public void PlayLine(int line)
         {
             GetAudioData();
@@ -157,7 +137,10 @@ namespace CodeSonification
             }
         }
 
-        private void ApplyCurrentLayer()
+        /// <summary>
+        /// Constrcuts the list of sounds to be played based on the current layer.
+        /// </summary>
+        public void ApplyCurrentLayer()
         {
             switch (mvarLayer)
             {
@@ -189,7 +172,12 @@ namespace CodeSonification
             }
         }
 
-        private MuteType GetMuteType(string word)
+        /// <summary>
+        /// Returns the type of muting required based on the access modifier given.
+        /// </summary>
+        /// <param name="word">Access modifier in string form</param>
+        /// <returns>MuteType that is appropriate</returns>
+        public MuteType GetMuteType(string word)
         {
             if (word == "private")
             {
@@ -207,11 +195,12 @@ namespace CodeSonification
             return MuteType.normal;
         }
 
+        /// <summary>
+        /// Searches through the given node to find anything to convert into AudioData.
+        /// </summary>
+        /// <param name="member">Syntax node to search through</param>
         private void RecurseFindData(CSharpSyntaxNode member)
         {
-            // From method -> Body -> for each code block statement get their length and position
-            // search through method for outside calls?
-
             if (member is StatementSyntax st)
             {
                 if (st is IfStatementSyntax ifs)
@@ -557,18 +546,22 @@ namespace CodeSonification
 
                 mvarClassData.Add(endData);
 
-                foreach (var child in ns.Members)
+                foreach (MemberDeclarationSyntax child in ns.Members)
                 {
                     RecurseFindData(child);
                 }
             }
         }
 
+        /// <summary>
+        /// Takes the current code text and finds generates AudioData from it.
+        /// </summary>
         public void GetAudioData()
         {
             mvarClassData = new List<AudioData>();
             mvarMethodData = new List<AudioData>();
             mvarInternalsData = new List<AudioData>();
+            mvarStaticsData = new List<AudioData>();
 
             if (mvarCurrentCodeText == null)
             {
@@ -598,6 +591,10 @@ namespace CodeSonification
             mvarTotalBeats = root.GetLocation().GetLineSpan().EndLinePosition.Line - root.GetLocation().GetLineSpan().StartLinePosition.Line;
         }
 
+        /// <summary>
+        /// Starts playback of the current code.
+        /// </summary>
+        /// <returns>Whether playback start was successful</returns>
         public bool BeginPlayback()
         {
             if (mvarPlaybackState == PlaybackState.Stopped)
@@ -624,13 +621,20 @@ namespace CodeSonification
             }
         }
 
+        /// <summary>
+        /// Stops playback if playing
+        /// </summary>
+        /// <returns>Wether playback stop was successful</returns>
         public bool StopPlayback()
         {
             if (mvarPlaybackState == PlaybackState.Playing)
             {
                 CurrentBeat = 0;
 
-                mvarTokenSource.Cancel();
+                if (mvarTokenSource != null)
+                {
+                    mvarTokenSource.Cancel();
+                }
 
                 mvarPlaybackState = PlaybackState.Stopped;
 
@@ -642,10 +646,77 @@ namespace CodeSonification
             }
         }
 
-        public void ChangeLayer(LayerState newLayer)
+        /// <summary>
+        /// Sets the current layer based upon a given string.
+        /// </summary>
+        /// <param name="layer">Layer name in string form with button concat</param>
+        public void ChangeLayer(string layer)
         {
-            Layer = newLayer;
-            ApplyCurrentLayer();
+            LayerState chosenLayer = LayerState.All;
+
+            if (layer == "ClassButton")
+            {
+                chosenLayer = LayerState.Class;
+            }
+            else if (layer == "MethodButton")
+            {
+                chosenLayer = LayerState.Method;
+            }
+            else if (layer == "InternalButton")
+            {
+                chosenLayer = LayerState.Internals;
+            }
+
+            Layer = chosenLayer;
+        }
+
+        /// <summary>
+        /// Handles keypresses from the view.
+        /// </summary>
+        /// <param name="keyData">Key event information: Key, Modifiers, Handled</param>
+        /// <returns>Whether to play the current line</returns>
+        public bool HandleKeyPress(ref KeyData kd)
+        {
+            if (kd.Key == Key.Left)
+            {
+                if (Layer != LayerState.All)
+                {
+                    Layer = Layer - 1;
+                }
+
+                kd.HandledState = true;
+            }
+            else if (kd.Key == Key.Right)
+            {
+
+                if (Layer != LayerState.Internals)
+                {
+                    Layer = Layer + 1;
+                }
+                kd.HandledState = true;
+            }
+            else if (kd.Key == Key.Space && kd.Modifiers == ModifierKeys.Control)
+            {
+                kd.HandledState = true;
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Imports a file a sets the current code text box to be the contents.
+        /// </summary>
+        /// <param name="fileName">Filepath to intended code file</param>
+        public void HandleImport(string fileName)
+        {
+            if (fileName != "")
+            {
+                string path = fileName;
+
+                CurrentFilePath = path;
+                CurrentCodeText = File.ReadAllText(path);
+            }
         }
     }
 }
