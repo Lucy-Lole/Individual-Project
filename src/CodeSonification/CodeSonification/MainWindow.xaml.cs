@@ -13,7 +13,7 @@ namespace CodeSonification
 
         public MainWindow()
         {
-            mvarDataContext = new MainWindowDataContext();
+            mvarDataContext = new MainWindowDataContext(true);
             DataContext = mvarDataContext;
             InitializeComponent();
         }

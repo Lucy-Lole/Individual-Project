@@ -103,13 +103,16 @@ namespace CodeSonification
             get { return mvarPlaybackState; }
         }
 
-        public MainWindowDataContext()
+        public MainWindowDataContext(bool initialiseAudioController)
         {
             mvarCurrentFilePath = "";
             mvarSettings = new Settings();
             mvarPlaybackState = PlaybackState.Stopped;
             mvarCurrentBeat = 0;
-            mvarAudioController = new AudioController();
+            if (initialiseAudioController)
+            { 
+                mvarAudioController = new AudioController(); 
+            }
             mvarCurrentData = new List<AudioData>();
             mvarClassData = new List<AudioData>();
             mvarMethodData = new List<AudioData>();
@@ -609,9 +612,12 @@ namespace CodeSonification
 
                 mvarTokenSource = new CancellationTokenSource();
 
-                mvarPlaybackThread = new Thread(() => mvarAudioController.StartPlayback(this, mvarTokenSource.Token));
+                if (mvarAudioController != null)
+                {
+                    mvarPlaybackThread = new Thread(() => mvarAudioController.StartPlayback(this, mvarTokenSource.Token));
 
-                mvarPlaybackThread.Start();
+                    mvarPlaybackThread.Start();
+                }
 
                 return true;
             }

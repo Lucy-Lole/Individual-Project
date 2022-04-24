@@ -98,7 +98,7 @@ namespace CodeSonificationTests
         [TestMethod]
         public void ConstructorTest()
         {
-            mvarDataContext = new MainWindowDataContext();
+            mvarDataContext = new MainWindowDataContext(false);
             Assert.AreEqual(mvarDataContext.Layer, LayerState.All);
             Assert.AreEqual(mvarDataContext.CurrentState, PlaybackState.Stopped);
         }
@@ -106,7 +106,7 @@ namespace CodeSonificationTests
         [TestMethod]
         public void GetAudioDataTest()
         {
-            mvarDataContext = new MainWindowDataContext();
+            mvarDataContext = new MainWindowDataContext(false);
             mvarDataContext.Layer = LayerState.All;
 
             mvarDataContext.CurrentCodeText = TestAudioData;
@@ -140,7 +140,7 @@ namespace CodeSonificationTests
         [TestMethod]
         public void ApplyCurrentLayerTest()
         {
-            mvarDataContext = new MainWindowDataContext();
+            mvarDataContext = new MainWindowDataContext(false);
 
             mvarDataContext.CurrentCodeText = TestAudioData;
             mvarDataContext.GetAudioData();
@@ -165,7 +165,7 @@ namespace CodeSonificationTests
         [TestMethod]
         public void GetMuteTypeTest()
         {
-            mvarDataContext = new MainWindowDataContext();
+            mvarDataContext = new MainWindowDataContext(false);
 
             Assert.AreEqual(MuteType.mute, mvarDataContext.GetMuteType("private"));
             Assert.AreEqual(MuteType.normal, mvarDataContext.GetMuteType("public"));
@@ -177,7 +177,7 @@ namespace CodeSonificationTests
         [TestMethod]
         public void PlaybackTests()
         {
-            mvarDataContext = new MainWindowDataContext();
+            mvarDataContext = new MainWindowDataContext(false);
 
             Assert.AreEqual(PlaybackState.Stopped, mvarDataContext.CurrentState);
             Assert.IsFalse(mvarDataContext.StopPlayback());
@@ -193,7 +193,7 @@ namespace CodeSonificationTests
         [TestMethod]
         public void ChangeLayerTest()
         {
-            mvarDataContext = new MainWindowDataContext();
+            mvarDataContext = new MainWindowDataContext(false);
 
             Assert.AreEqual(LayerState.All, mvarDataContext.Layer);
 
@@ -213,7 +213,7 @@ namespace CodeSonificationTests
         [TestMethod]
         public void KeyPressTest()
         {
-            mvarDataContext = new MainWindowDataContext();
+            mvarDataContext = new MainWindowDataContext(false);
 
             KeyData kd = new KeyData(Key.Space, ModifierKeys.Control);
             Assert.IsTrue(mvarDataContext.HandleKeyPress(ref kd));
@@ -236,6 +236,16 @@ namespace CodeSonificationTests
             Assert.IsFalse(mvarDataContext.HandleKeyPress(ref kd));
             Assert.AreEqual(LayerState.Internals, mvarDataContext.Layer);
             Assert.IsFalse(kd.HandledState);
+
+        }
+    }
+
+    [TestClass]
+    public class PlaybackControllerTests
+    {
+        [TestMethod]
+        public void Test()
+        {
 
         }
     }
