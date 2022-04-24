@@ -22,5 +22,7 @@ jobs:
       working-directory: src/CodeSonification
     - name: Build
       run: dotnet build --configuration Release --no-restore
+      working-directory: src/CodeSonification
     - name: Test
       run: dotnet test --no-restore --verbosity normal
+      working-directory: src/CodeSonification
