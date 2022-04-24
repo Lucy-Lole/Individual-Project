@@ -241,12 +241,33 @@ namespace CodeSonificationTests
     }
 
     [TestClass]
-    public class PlaybackControllerTests
+    public class SliderValueToTextConverterTests
     {
         [TestMethod]
-        public void Test()
+        public void ConvertTest()
         {
+            SliderValueToTextConverter conv = new SliderValueToTextConverter();
 
+            Assert.AreEqual("0", conv.Convert("", null, null, null));
+            Assert.AreEqual("1", conv.Convert(1.00, null, null, null));
+            Assert.AreEqual("100", conv.Convert(100.00, null, null, null));
+            Assert.AreEqual("50", conv.Convert(50.90, null, null, null));
+        }
+
+        [TestMethod]
+        public void ConvertBackTest()
+        {
+            SliderValueToTextConverter conv = new SliderValueToTextConverter();
+            try
+            {
+                var test = conv.ConvertBack(null, null, null, null);
+
+                Assert.AreEqual(null, test);
+            }
+            catch (Exception e)
+            {
+                Assert.AreEqual(e.GetType(), typeof(NotImplementedException));
+            }
         }
     }
 }

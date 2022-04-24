@@ -40,6 +40,7 @@ namespace CodeSonification
 
                 List<float> wholeFile = new List<float>((int)(audioFileReader.Length / 4));
                 float[] readBuffer = new float[shift.WaveFormat.SampleRate * shift.WaveFormat.Channels];
+
                 int samplesRead;
                 while ((samplesRead = shift.Read(readBuffer, 0, readBuffer.Length)) > 0)
                 {
