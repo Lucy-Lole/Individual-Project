@@ -10,9 +10,9 @@ namespace CodeSonification
         Dictionary<int, List<AudioData>> mvarCurrentAD;
         Dictionary<int, List<AudioData>> mvarHoldingData;
 
-        PlaybackController mvarDustOut;
-        PlaybackController mvarNamespaceOut;
-        PlaybackController mvarOtherOut;
+        OutputController mvarDustOut;
+        OutputController mvarNamespaceOut;
+        OutputController mvarOtherOut;
 
         int mvarIndentLevel = 0;
         bool mvarInNamespace = false;
@@ -70,9 +70,9 @@ namespace CodeSonification
             mvarSounds["birds"] = new CachedSound(".\\Resources\\birds.wav");
             mvarSounds["namespace"] = new CachedSound(".\\Resources\\namespace.wav");
 
-            mvarDustOut = new PlaybackController();
-            mvarOtherOut = new PlaybackController();
-            mvarNamespaceOut = new PlaybackController();
+            mvarDustOut = new OutputController();
+            mvarOtherOut = new OutputController();
+            mvarNamespaceOut = new OutputController();
 
         }
 

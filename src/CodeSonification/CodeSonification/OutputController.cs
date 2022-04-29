@@ -4,13 +4,13 @@ using System;
 
 namespace CodeSonification
 {
-    class PlaybackController : IDisposable
+    class OutputController : IDisposable
     {
         private IWavePlayer mvarOutputDevice;
         private MixingSampleProvider mvarMixer;
         private VolumeSampleProvider mvarVolProv;
 
-        public PlaybackController()
+        public OutputController()
         {
             var format = WaveFormat.CreateIeeeFloatWaveFormat(44100, 2);
 
