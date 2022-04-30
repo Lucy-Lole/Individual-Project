@@ -43,6 +43,7 @@ namespace CodeSonification
             set
             {
                 mvarLayer = value;
+                ApplyCurrentLayer();
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Layer"));
             }
         }
