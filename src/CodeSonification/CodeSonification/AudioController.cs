@@ -258,7 +258,7 @@ namespace CodeSonification
                         mvarDustOut.PlaySound(mvarSounds["dust"], CallingContext.Volume * (mvarDustSoundLevel < mvarMaxDust ? (float)mvarDustSoundLevel / mvarMaxDust : 1.0f));
                     }
 
-                    if (mvarInNamespace)
+                    if (mvarInNamespace && (CallingContext.Layer == LayerState.All || CallingContext.Layer == LayerState.Class))
                     {
                         mvarNamespaceOut.PlaySound(mvarSounds["namespace"], CallingContext.Volume);
                     }

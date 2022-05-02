@@ -539,7 +539,7 @@ namespace CodeSonification
 
                 newData.Length = ns.GetLocation().GetLineSpan().EndLinePosition.Line - ns.GetLocation().GetLineSpan().StartLinePosition.Line;
 
-                mvarClassData.Add(newData);
+                mvarStaticsData.Add(newData);
 
                 AudioData endData = new AudioData(ns.Name.ToString() + " END",
                     ns.GetLocation().GetLineSpan().EndLinePosition.Line,
@@ -548,7 +548,7 @@ namespace CodeSonification
                     MuteType.normal,
                     false);
 
-                mvarClassData.Add(endData);
+                mvarStaticsData.Add(endData);
 
                 foreach (MemberDeclarationSyntax child in ns.Members)
                 {
