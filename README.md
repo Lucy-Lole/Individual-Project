@@ -1,6 +1,14 @@
 # Lucy Lole's C# Sonifier
 
+## Building
+
+Simply clone or download the respository then open `.src\CodeSonification\CodeSonification.sln` within visual studio.
+
+If you get an 'Asset file not found' error, open the package manager console and type `dotnet restore`.
+
 ## Requirements
+
+Both of these **should** be downloaded by nuget.
 
 NAudio - https://github.com/naudio/NAudio
 
